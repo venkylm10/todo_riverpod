@@ -32,14 +32,14 @@ class RadioWidget extends ConsumerWidget {
               value: valueInput,
               groupValue: radioCategory,
               onChanged: (value) {
-                ref.read(radioProvider.notifier).update(value!);
-                print("radio at value" + value.toString());
+                ref.read(radioProvider.notifier).update((state) => value!);
+                print("radio at value$value");
               },
             ),
             GestureDetector(
               onTap: () {
-                ref.read(radioProvider.notifier).update(valueInput);
-                print("radio at value" + valueInput.toString());
+                ref.read(radioProvider.notifier).update((state) => valueInput);
+                print("radio at value$valueInput");
               },
               child: Text(
                 title,

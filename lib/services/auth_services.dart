@@ -29,8 +29,10 @@ class AuthServices {
         'totalTasks': 2,
       });
 
-      createDefualtData(context);
-    } on FirebaseAuthException {}
+      createDefualtData(context, uid);
+    } on FirebaseAuthException catch (e) {
+      print(e.toString());
+    }
     signInWithEmailAndPassword(
       email: email,
       password: password,
@@ -55,10 +57,10 @@ class AuthServices {
     }
   }
 
-  void createDefualtData(BuildContext context) {
+  void createDefualtData(BuildContext context, String uid) {
     final userRoot = FirebaseFirestore.instance
         .collection(FireStoreConstants.usersPath)
-        .doc(auth.currentUser!.uid);
+        .doc(uid);
 
     userRoot.collection('categories').add({
       'title': "Learning",
@@ -75,7 +77,6 @@ class AuthServices {
     DocumentReference docRef1 = userRoot.collection('tasks').doc();
     DocumentReference docRef2 = userRoot.collection('tasks').doc();
 
-    // Get the auto-generated ID and set it as the 'id' field in your document
     String docId1 = docRef1.id;
     String docId2 = docRef2.id;
 
@@ -114,7 +115,9 @@ class AuthServices {
         email: email,
         password: password,
       );
-    } on FirebaseAuthException {}
+    } on FirebaseAuthException catch (e) {
+      print(e.toString());
+    }
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
   }
 
@@ -135,16 +138,17 @@ class AuthServices {
       print('got user credentials');
       if (userCredential.additionalUserInfo!.isNewUser) {
         String uid = userCredential.user!.uid;
+        print("google sign in uid: $uid");
         users.doc(uid).set({
           'uid': uid,
-          'name': googleUser!.displayName ?? "googleUser",
-          'totalCategories': 3,
-          'totalTasks': 2,
+          'name': googleUser!.displayName,
         });
 
-        createDefualtData(context);
+        createDefualtData(context, uid);
       }
-    } catch (e) {}
+    } on FirebaseAuthException catch (e) {
+      print(e.toString());
+    }
   }
 
   void signOut() async {
@@ -154,4 +158,6 @@ class AuthServices {
       googleSignIn.disconnect();
     } on FirebaseAuthException {}
   }
+
+  void updateName(String name) {}
 }

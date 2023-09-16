@@ -181,12 +181,13 @@ class _AddNewTaskModalState extends ConsumerState<AddNewTaskModal> {
                         .doc();
 
                     final String docId = docRef.id;
+                    final int categoryIndex = ref.read(radioProvider) - 1;
                     ref.read(todoServiceProvider).addNewTask(
                           TodoModel(
                             id: docId,
                             title: titleController.text,
                             description: descriptionController.text,
-                            category: category[ref.read(radioProvider)],
+                            category: category[categoryIndex],
                             date: dateProv,
                             time: timeProv,
                             isCompleted: false,
@@ -201,7 +202,6 @@ class _AddNewTaskModalState extends ConsumerState<AddNewTaskModal> {
                         .read(timeProvider.notifier)
                         .update((state) => 'hh : mm');
                     Navigator.pop(context);
-                    ref.read(radioProvider.notifier).update(0);
                     print("todo added");
                   },
                   child: const Text("Create"),

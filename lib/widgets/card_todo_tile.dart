@@ -105,7 +105,7 @@ class CardTodoTile extends ConsumerWidget {
                       children: [
                         DateFormat('dd/MM/yy').format(DateTime.now()) ==
                                 todo.date
-                            ? Text("Today")
+                            ? const Text("Today")
                             : Text(todo.date),
                         const Gap(12),
                         Text(todo.time),

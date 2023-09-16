@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 import 'package:todo_riverpod/constants/app_style.dart';
 import 'package:todo_riverpod/provider/auth_service_provider.dart';
 import 'package:todo_riverpod/provider/todo_service_provider.dart';
@@ -19,7 +20,7 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authServices = ref.read(authServicesProvider);
     final todoList = ref.watch(todoStreamProvider);
-    final userModel = ref.watch(userProvider);
+    final userSnapshot = ref.watch(userProvider);
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
@@ -39,10 +40,11 @@ class HomePage extends ConsumerWidget {
               color: Colors.grey,
             ),
           ),
-          subtitle: userModel.when(
-            data: (userModel) {
+          subtitle: userSnapshot.when(
+            data: (snapshot) {
+              final user = snapshot.data();
               return Text(
-                userModel.name,
+                user != null ? user['name'] : 'username',
                 style: AppStyles.heading1,
               );
             },
@@ -55,8 +57,10 @@ class HomePage extends ConsumerWidget {
               );
             },
             error: (error, stackTrace) {
+              print("username error");
+              print(error.toString());
               return Text(
-                "username",
+                "error",
                 style: TextStyle(
                   color: Colors.grey.shade300,
                 ),
@@ -95,10 +99,10 @@ class HomePage extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         "Today's Tasks",
                         style: TextStyle(
                           fontSize: 20,
@@ -106,9 +110,10 @@ class HomePage extends ConsumerWidget {
                           color: Colors.black,
                         ),
                       ),
+                      const Gap(6),
                       Text(
-                        "Friday, 15 Sep",
-                        style: TextStyle(
+                        DateFormat('EEEE, d MMM').format(DateTime.now()),
+                        style: const TextStyle(
                           color: Colors.grey,
                         ),
                       ),
@@ -151,10 +156,10 @@ class HomePage extends ConsumerWidget {
                   );
                 },
                 error: (error, stackTrack) {
-                  return Text(error.toString());
+                  return const Text("Error occured: try reopening");
                 },
                 loading: () {
-                  return Center(
+                  return const Center(
                     child: Text("loading"),
                   );
                 },
