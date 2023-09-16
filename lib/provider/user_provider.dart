@@ -8,5 +8,9 @@ final userProvider = StreamProvider<DocumentSnapshot<Map<String, dynamic>>>((ref
   final getData = authServices.users
       .doc(authServices.auth.currentUser!.uid)
       .snapshots();
+
+  ref.onDispose(() {
+    getData.drain();
+  });
   yield* getData;
 });

@@ -32,7 +32,7 @@ class _AddNewTaskModalState extends ConsumerState<AddNewTaskModal> {
     super.initState();
   }
 
-  final category = ['Learning', 'Work', 'General'];
+  final categories = ['Learning', 'Work', 'General'];
   final colors = [Colors.green, Colors.blueAccent, Colors.amberAccent];
 
   @override
@@ -88,10 +88,10 @@ class _AddNewTaskModalState extends ConsumerState<AddNewTaskModal> {
           ),
           Wrap(
             children: List.generate(
-              category.length,
+              categories.length,
               (index) {
                 return RadioWidget(
-                  title: category[index],
+                  title: categories[index],
                   categoryColor: colors[index],
                   valueInput: index + 1,
                 );
@@ -187,7 +187,7 @@ class _AddNewTaskModalState extends ConsumerState<AddNewTaskModal> {
                             id: docId,
                             title: titleController.text,
                             description: descriptionController.text,
-                            category: category[categoryIndex],
+                            category: categories[categoryIndex],
                             date: dateProv,
                             time: timeProv,
                             isCompleted: false,

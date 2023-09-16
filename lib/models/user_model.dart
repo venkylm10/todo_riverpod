@@ -29,7 +29,7 @@ class UserModel {
     return UserModel(
       uid: map['uid'] != null ? map['uid'] as String : 'uid',
       name: map['name'] as String,
-      email: map['email'] as String,
+      email: map['email'] ?? 'email',
       totalCategories: map['totalCategories'] as int,
       totalTasks: map['totalTasks'] as int,
     );
