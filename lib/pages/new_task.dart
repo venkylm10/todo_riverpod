@@ -5,9 +5,10 @@ import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_riverpod/constants/app_style.dart';
 import 'package:todo_riverpod/models/todo_models.dart';
+import 'package:todo_riverpod/provider/auth_service_provider.dart';
 import 'package:todo_riverpod/provider/date_time_provider.dart';
 import 'package:todo_riverpod/provider/radio_provider.dart';
-import 'package:todo_riverpod/provider/service_provider.dart';
+import 'package:todo_riverpod/provider/todo_service_provider.dart';
 import 'package:todo_riverpod/widgets/radio_widget.dart';
 import '../widgets/date_time_widget.dart';
 import '../widgets/text_field_widget.dart';
@@ -31,21 +32,22 @@ class _AddNewTaskModalState extends ConsumerState<AddNewTaskModal> {
     super.initState();
   }
 
-  final category = ['LRN', 'WRK', 'GEN'];
+  final category = ['Learning', 'Work', 'General'];
+  final colors = [Colors.green, Colors.blueAccent, Colors.amberAccent];
 
   @override
   Widget build(BuildContext context) {
+    final authServices = ref.watch(authServicesProvider);
     final dateProv = ref.watch(dateProvider);
     final timeProv = ref.watch(timeProvider);
-    Size size = MediaQuery.of(context).size;
     return Container(
-      padding: const EdgeInsets.all(30),
-      height: size.height * 0.70,
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(
@@ -66,23 +68,15 @@ class _AddNewTaskModalState extends ConsumerState<AddNewTaskModal> {
             color: Colors.grey.shade200,
           ),
           const Gap(12),
-          const Text(
-            "Title",
-            style: AppStyles.heading1,
-          ),
-          const Gap(6),
           TextFieldWidget(
+            title: "Title",
             hintText: "Add Task name",
             maxLines: 1,
             controller: titleController,
           ),
           const Gap(12),
-          const Text(
-            "Description",
-            style: AppStyles.heading1,
-          ),
-          const Gap(6),
           TextFieldWidget(
+            title: "Description",
             hintText: "Add Task description",
             maxLines: 5,
             controller: descriptionController,
@@ -92,30 +86,17 @@ class _AddNewTaskModalState extends ConsumerState<AddNewTaskModal> {
             "Category",
             style: AppStyles.heading1,
           ),
-          Row(
-            children: [
-              const Expanded(
-                child: RadioWidget(
-                  title: "LRN",
-                  categoryColor: Colors.green,
-                  valueInput: 1,
-                ),
-              ),
-              const Expanded(
-                child: RadioWidget(
-                  title: "WRK",
-                  categoryColor: Colors.blueAccent,
-                  valueInput: 2,
-                ),
-              ),
-              Expanded(
-                child: RadioWidget(
-                  title: "GEN",
-                  categoryColor: Colors.amberAccent.shade700,
-                  valueInput: 3,
-                ),
-              ),
-            ],
+          Wrap(
+            children: List.generate(
+              category.length,
+              (index) {
+                return RadioWidget(
+                  title: category[index],
+                  categoryColor: colors[index],
+                  valueInput: index + 1,
+                );
+              },
+            ),
           ),
           const Gap(12),
           Row(
@@ -194,26 +175,41 @@ class _AddNewTaskModalState extends ConsumerState<AddNewTaskModal> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   onPressed: () {
-                    ref.read(serviceProvider).addNewTask(
+                    final docRef = authServices.users
+                        .doc(authServices.auth.currentUser!.uid)
+                        .collection('tasks')
+                        .doc();
+
+                    final String docId = docRef.id;
+                    ref.read(todoServiceProvider).addNewTask(
                           TodoModel(
+                            id: docId,
                             title: titleController.text,
                             description: descriptionController.text,
                             category: category[ref.read(radioProvider)],
                             date: dateProv,
                             time: timeProv,
+                            isCompleted: false,
                           ),
                         );
                     titleController.clear();
                     descriptionController.clear();
+                    ref
+                        .read(dateProvider.notifier)
+                        .update((state) => 'dd/mm/yy');
+                    ref
+                        .read(timeProvider.notifier)
+                        .update((state) => 'hh : mm');
                     Navigator.pop(context);
                     ref.read(radioProvider.notifier).update(0);
-                    print("data is saving");
+                    print("todo added");
                   },
                   child: const Text("Create"),
                 ),
               ),
             ],
-          )
+          ),
+          const Gap(24),
         ],
       ),
     );

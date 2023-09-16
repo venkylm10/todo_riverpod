@@ -1,15 +1,25 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:todo_riverpod/constants/app_style.dart';
+import 'package:todo_riverpod/provider/auth_service_provider.dart';
+import 'package:todo_riverpod/provider/todo_service_provider.dart';
+import 'package:todo_riverpod/provider/user_provider.dart';
 import 'package:todo_riverpod/widgets/card_todo_tile.dart';
 
 import 'new_task.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class HomePage extends ConsumerWidget {
+  const HomePage({
+    super.key,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authServices = ref.read(authServicesProvider);
+    final todoList = ref.watch(todoStreamProvider);
+    final userModel = ref.watch(userProvider);
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
@@ -29,12 +39,29 @@ class HomePage extends StatelessWidget {
               color: Colors.grey,
             ),
           ),
-          subtitle: const Text(
-            "Venkatesh",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
+          subtitle: userModel.when(
+            data: (userModel) {
+              return Text(
+                userModel.name,
+                style: AppStyles.heading1,
+              );
+            },
+            loading: () {
+              return Text(
+                "username",
+                style: TextStyle(
+                  color: Colors.grey.shade300,
+                ),
+              );
+            },
+            error: (error, stackTrace) {
+              return Text(
+                "username",
+                style: TextStyle(
+                  color: Colors.grey.shade300,
+                ),
+              );
+            },
           ),
         ),
         actions: [
@@ -49,8 +76,10 @@ class HomePage extends StatelessWidget {
                   icon: const Icon(CupertinoIcons.calendar),
                 ),
                 IconButton(
-                  onPressed: () {},
-                  icon: const Icon(CupertinoIcons.bell),
+                  onPressed: () {
+                    authServices.signOut();
+                  },
+                  icon: const Icon(Icons.logout_rounded),
                 ),
               ],
             ),
@@ -103,7 +132,7 @@ class HomePage extends StatelessWidget {
                       ),
                       context: context,
                       builder: (context) {
-                        return AddNewTaskModal();
+                        return const AddNewTaskModal();
                       },
                     ),
                     child: const Text("+ New Task"),
@@ -111,9 +140,25 @@ class HomePage extends StatelessWidget {
                 ],
               ),
               const Gap(18),
-              const CardTodoTile(),
-              const CardTodoTile(),
-              const CardTodoTile(),
+              todoList.when(
+                data: (data) {
+                  return ListView.builder(
+                    itemCount: data.length,
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      return CardTodoTile(todo: data[index]);
+                    },
+                  );
+                },
+                error: (error, stackTrack) {
+                  return Text(error.toString());
+                },
+                loading: () {
+                  return Center(
+                    child: Text("loading"),
+                  );
+                },
+              ),
             ],
           ),
         ),
