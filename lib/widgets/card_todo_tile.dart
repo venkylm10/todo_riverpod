@@ -8,7 +8,6 @@ import 'package:todo_riverpod/models/todo_models.dart';
 import 'package:todo_riverpod/provider/auth_service_provider.dart';
 import 'package:todo_riverpod/provider/color_provider.dart';
 import 'package:todo_riverpod/provider/todo_service_provider.dart';
-import 'package:todo_riverpod/services/auth_services.dart';
 
 class CardTodoTile extends ConsumerWidget {
   final TodoModel todo;
